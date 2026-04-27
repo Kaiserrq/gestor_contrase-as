@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* ═══════════════════════════════════════════════════
    DESIGN TOKENS
@@ -38,6 +38,7 @@
   --shadow-glow: 0 0 40px rgba(108,99,255,0.2);
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --card-bg: #13141f;
 }
 
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
@@ -289,6 +290,7 @@ button.nav-item:hover { background:rgba(108,99,255,0.06) !important; border-colo
 .topbar-title { flex:1; }
 .topbar-title h2 { font-size:26px; font-weight:800; color:var(--text); }
 .topbar-title p { font-size:13px; color:var(--muted); margin-top:3px; }
+.topbar-actions { display:flex; align-items:center; gap:8px; flex-shrink:0; }
 .search-wrap { position:relative; flex-shrink:0; }
 .search-wrap svg { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); width:15px; height:15px; pointer-events:none; }
 .search-input {
