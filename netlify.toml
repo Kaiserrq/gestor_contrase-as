@@ -1,0 +1,8 @@
+# Despliegue como DEMO estática: sin build, sin backend (backend/ no se publica como funciones).
+[build]
+  publish = "."
+  command = ""
+
+# No ejecutar el install script de better-sqlite3 (no se usa en la demo).
+[build.environment]
+  NPM_FLAGS = "--ignore-scripts"

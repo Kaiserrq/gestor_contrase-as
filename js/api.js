@@ -111,3 +111,16 @@ const api = {
     return res.json();
   }
 };
+
+// MODO DEMO (sin backend, datos en localStorage): *.netlify.app, window.DEMO_MODE=true o ?demo.
+// api-demo.js se carga de forma síncrona y sobrescribe los métodos de `api`; los demás js no cambian.
+(function () {
+  let demo = location.hostname.endsWith("netlify.app") || window.DEMO_MODE === true;
+  try {
+    const q = new URLSearchParams(location.search).get("demo");
+    if (q === "0") { sessionStorage.removeItem("demo_active"); demo = false; }
+    else if (q !== null) sessionStorage.setItem("demo_active", "1");
+    if (q !== "0" && sessionStorage.getItem("demo_active") === "1") demo = true;
+  } catch (_) {}
+  if (demo) document.write("<script src=\"/js/api-demo.js\"><\/script>");
+})();
