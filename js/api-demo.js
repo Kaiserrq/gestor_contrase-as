@@ -24,8 +24,8 @@
       mk(4, 'Repositorio de Código', 'https://git.example.com', 'demo-dev', 'Falsa-Pass-004', 'github', 'trabajo', ''),
       mk(5, 'Servidor Interno', 'https://intranet.example.com', 'admin-demo', 'Falsa-Pass-005', 'server', 'trabajo', 'Solo demostración'),
       mk(6, 'Banco Ejemplo', 'https://banco.example.com', '00000000', 'Falsa-Pass-006', 'card', 'banco', 'No es un banco real'),
-      mk(7, 'Tienda Online', 'https://tienda.example.com', 'demo@example.com', 'Falsa-Pass-007', 'shopping', 'apps', ''),
-      mk(8, 'WiFi Casa', '', 'RedDemo', 'Falsa-Pass-008', 'wifi', 'apps', 'Contraseña ficticia')
+      mk(7, 'Tienda Online', 'https://tienda.example.com', 'demo@example.com', 'Falsa-Pass-002', 'shopping', 'apps', ''),
+      mk(8, 'WiFi Casa', '', 'RedDemo', 'casa1234', 'wifi', 'apps', 'Contraseña ficticia')
     ]);
     write('categories', [{ id: 1, user_id: 1, name: 'Streaming', slug: 'streaming', created_at: t }]);
     write('seq', { passwords: 8, categories: 1, users: 1 });
@@ -143,30 +143,41 @@
     }
   });
 
-  // ── Banner + reinicio + credenciales en login ────────
+  // ── Píldora demo (descartable) + reinicio + chip de credenciales ────
   function resetDemo() {
     Object.keys(localStorage).filter(k => k.startsWith(P) && k !== P + 'active')
       .forEach(k => localStorage.removeItem(k));
     localStorage.removeItem('token'); localStorage.removeItem('username');
     window.location.href = '/login.html';
   }
+  window.kvResetDemo = resetDemo;   // lo usa también la página de perfil
 
   document.addEventListener('DOMContentLoaded', () => {
-    const bar = document.createElement('div');
-    bar.className = 'demo-bar';
-    bar.innerHTML = '<span><strong>Modo demo</strong><span class="demo-bar-long"> — los datos se guardan solo en tu navegador</span></span>' +
-      '<button type="button">Restablecer</button>';
-    document.body.classList.add('has-demo-bar');
-    bar.querySelector('button').addEventListener('click', resetDemo);
-    document.body.appendChild(bar);
+    let dismissed = false;
+    try { dismissed = sessionStorage.getItem('demo_pill_off') === '1'; } catch (_) {}
+    if (!dismissed) {
+      const wrap = document.createElement('div');
+      wrap.className = 'demo-wrap';
+      wrap.innerHTML = '<div class="demo-pill" role="note"><span>Modo demo</span>' +
+        '<button type="button" class="demo-reset">Restablecer</button>' +
+        '<button type="button" class="demo-x" aria-label="Ocultar aviso de demo">×</button></div>';
+      wrap.querySelector('.demo-reset').addEventListener('click', resetDemo);
+      wrap.querySelector('.demo-x').addEventListener('click', () => {
+        try { sessionStorage.setItem('demo_pill_off', '1'); } catch (_) {}
+        wrap.remove();
+      });
+      document.body.appendChild(wrap);   // en la app, shell.js lo recoloca arriba del contenido
+    }
 
+    // Login: chip clicable que autocompleta las credenciales de demo
     const u = document.getElementById('login-user'), p = document.getElementById('login-pass');
-    if (u && p) {
-      u.value = 'demo'; p.value = 'demo1234';
-      const hint = document.createElement('p');
-      hint.style.cssText = 'font-size:12px;opacity:.7;text-align:center;margin:8px 0 0';
-      hint.textContent = 'Demo: usuario "demo" · contraseña "demo1234"';
-      document.getElementById('login-form')?.appendChild(hint);
+    const chip = document.getElementById('demo-chip');
+    if (u && p && chip) {
+      chip.classList.remove('hidden');
+      chip.addEventListener('click', () => {
+        u.value = 'demo'; p.value = 'demo1234';
+        p.focus();
+      });
     }
   });
 })();

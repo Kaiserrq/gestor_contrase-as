@@ -11,32 +11,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!authData?.valid) return api.logout();
 
   const uname = localStorage.getItem('username') || authData.user?.username || 'Usuario';
-  document.getElementById('username-display').textContent = uname;
-  document.getElementById('user-avatar').textContent = uname[0].toUpperCase();
-  document.getElementById('badge-username').textContent = uname;
+  Shell.setUser(uname);
 
-  // ── Logout ────────────────────────────────────────
-  document.getElementById('btn-logout')?.addEventListener('click', () => api.logout());
+  // Categorías en el sidebar
+  loadCategories();
 
-  // ── Sidebar móvil ─────────────────────────────────
-  const sidebar = document.querySelector('.sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  document.getElementById('btn-menu')?.addEventListener('click', () => {
-    sidebar.classList.add('open'); overlay.classList.add('show');
-  });
-  overlay?.addEventListener('click', () => {
-    sidebar.classList.remove('open'); overlay.classList.remove('show');
-  });
-
-  // ── Custom categories en sidebar ──────────────────
-  try {
-    const cats = await api.getCategories();
-    const nav  = document.getElementById('custom-cats-nav');
-    if (nav && cats.length) {
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
-      nav.innerHTML = cats.map(c => `<a class="nav-item" href="/passwords.html?cat=${c.slug}">${svg}${c.name}</a>`).join('');
-    }
-  } catch (_) {}
+  // ── Restablecer demo (solo en modo demo) ──────────
+  if (typeof window.kvResetDemo === 'function') {
+    const box = document.getElementById('demo-reset-box');
+    box?.classList.remove('hidden');
+    document.getElementById('btn-demo-reset')?.addEventListener('click', async () => {
+      const ok = await confirmDialog({
+        title: '¿Restablecer la demo?',
+        message: 'Se borrarán los datos de este navegador y volverán los de ejemplo.',
+        confirmText: 'Restablecer', danger: false
+      });
+      if (ok) window.kvResetDemo();
+    });
+  }
 
   // ── Cambiar nombre de usuario ─────────────────────
   document.getElementById('btn-save-username')?.addEventListener('click', async () => {
@@ -62,9 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (result.error) return showToast(result.error, 'error');
 
     localStorage.setItem('username', result.username);
-    document.getElementById('username-display').textContent = result.username;
-    document.getElementById('user-avatar').textContent = result.username[0].toUpperCase();
-    document.getElementById('badge-username').textContent = result.username;
+    Shell.setUser(result.username);
     document.getElementById('p-newuser').value  = '';
     document.getElementById('p-curpw-u').value  = '';
     showToast('Usuario actualizado correctamente', 'success');

@@ -1,7 +1,7 @@
 // ====================================================
-//  KeyVault — frontend/js/auth.js
-//  Maneja login, registro, toggle de formularios y
-//  visibilidad de contraseñas en login.html
+//  KeyVault — js/auth.js
+//  Login, registro, pestañas animadas, visibilidad de contraseña
+//  y tilt 3D de la tarjeta en login.html
 // ====================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,42 +10,41 @@ document.addEventListener('DOMContentLoaded', () => {
   if (api.getToken()) {
     api.verify().then(r => {
       if (r.valid) window.location.href = '/dashboard.html';
-    });
+    }).catch(() => {});
   }
 
   // ── Referencias DOM ───────────────────────────────────────
   const loginForm    = document.getElementById('login-form');
   const registerForm = document.getElementById('register-form');
-  const showRegLink  = document.getElementById('show-register');
-  const showLogLink  = document.getElementById('show-login');
+  const tabs         = document.getElementById('tabs');
+  const tabLogin     = document.getElementById('tab-login');
+  const tabRegister  = document.getElementById('tab-register');
 
-  // ── Toggle entre formularios ──────────────────────────────
-  showRegLink?.addEventListener('click', (e) => {
-    e.preventDefault();
-    loginForm.classList.add('hidden');
-    registerForm.classList.remove('hidden');
-    document.getElementById('reg-user')?.focus();
-  });
-
-  showLogLink?.addEventListener('click', (e) => {
-    e.preventDefault();
-    registerForm.classList.add('hidden');
-    loginForm.classList.remove('hidden');
-    document.getElementById('login-user')?.focus();
+  // ── Pestañas (indicador deslizante) ───────────────────────
+  function showTab(which) {
+    const isLogin = which === 'login';
+    tabs.dataset.tab = which;
+    tabLogin.setAttribute('aria-selected', String(isLogin));
+    tabRegister.setAttribute('aria-selected', String(!isLogin));
+    loginForm.classList.toggle('hidden', !isLogin);
+    registerForm.classList.toggle('hidden', isLogin);
+    document.getElementById(isLogin ? 'login-user' : 'reg-user')?.focus({ preventScroll: true });
+  }
+  tabLogin?.addEventListener('click', () => showTab('login'));
+  tabRegister?.addEventListener('click', () => showTab('register'));
+  tabs?.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') { showTab('register'); tabRegister.focus(); }
+    if (e.key === 'ArrowLeft') { showTab('login'); tabLogin.focus(); }
   });
 
   // ── Toggle mostrar/ocultar contraseña ─────────────────────
   document.querySelectorAll('.toggle-password').forEach(btn => {
-    btn.style.cursor = 'pointer';
+    btn.innerHTML = svg('eye', 16);
     btn.addEventListener('click', () => {
-      const wrap  = btn.closest('.input-icon-wrap');
-      const input = wrap?.querySelector('input[type="password"], input[type="text"]');
+      const input = btn.closest('.input-wrap')?.querySelector('input');
       if (!input) return;
       input.type = input.type === 'password' ? 'text' : 'password';
-      // Cambiar icono entre ojo-abierto y ojo-cerrado
-      btn.innerHTML = input.type === 'text'
-        ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
-        : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+      btn.innerHTML = svg(input.type === 'text' ? 'eyeoff' : 'eye', 16);
     });
   });
 
@@ -73,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Guardar token y nombre de usuario
     api.setToken(data.token);
     localStorage.setItem('username', data.username);
 
@@ -124,12 +122,35 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('username', loginData.username);
       setTimeout(() => { window.location.href = '/dashboard.html'; }, 900);
     } else {
-      // Si algo falla, ir al login manualmente
       btn.disabled = false;
       btn.textContent = 'Crear cuenta';
-      registerForm.classList.add('hidden');
-      loginForm.classList.remove('hidden');
+      showTab('login');
     }
   });
+
+  // ── Tilt 3D de la tarjeta (máx. 6°, rAF; solo ratón y sin reduced-motion) ──
+  const card = document.getElementById('login-card');
+  const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const calm = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if (card && fine && !calm) {
+    const MAX = 6;
+    let raf = 0, px = 0, py = 0, active = false;
+    const paint = () => {
+      raf = 0;
+      card.style.setProperty('--ry', (px * MAX).toFixed(2) + 'deg');
+      card.style.setProperty('--rx', (-py * MAX).toFixed(2) + 'deg');
+    };
+    window.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      px = (e.clientX / innerWidth - 0.5) * 2;
+      py = (e.clientY / innerHeight - 0.5) * 2;
+      if (!active) { active = true; card.classList.add('tilting'); }
+      if (!raf) raf = requestAnimationFrame(paint);
+    }, { passive: true });
+    document.addEventListener('pointerleave', () => {
+      active = false; card.classList.remove('tilting'); px = py = 0;
+      if (!raf) raf = requestAnimationFrame(paint);
+    }, { passive: true });
+  }
 
 });

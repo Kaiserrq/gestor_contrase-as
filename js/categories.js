@@ -1,75 +1,47 @@
 // ═══════════════════════════════════════════════════
-//  GESTIÓN DE CATEGORÍAS PERSONALIZADAS
-//  Se carga después de dashboard.js
+//  GESTIÓN DE CATEGORÍAS PERSONALIZADAS (todas las páginas)
+//  Carga, sidebar, alta y baja. Emite "kv:cats" al cambiar.
 // ═══════════════════════════════════════════════════
 
 async function loadCategories() {
-  customCategories = await api.getCategories();
-  renderCustomCategories();
+  const r = await api.getCategories();
+  customCategories = Array.isArray(r) ? r : [];
+  renderCategoryNav();
+  document.dispatchEvent(new CustomEvent('kv:cats'));
 }
 
-function renderCustomCategories() {
-  const folderSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
-  const xSVG     = `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
-
-  // 1. Sidebar nav
-  const nav = document.getElementById('custom-cats-nav');
-  if (nav) {
-    nav.innerHTML = customCategories.map(c => `
-      <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">
-        <a class="nav-item" style="flex:1;margin-bottom:0" href="/passwords.html?cat=${c.slug}">
-          ${folderSVG}${escHtml(c.name)}
-        </a>
-        <button class="btn-icon btn-danger" style="padding:4px 5px;flex-shrink:0;height:32px"
-          title="Eliminar" onclick="deleteCat(${c.id},'${c.slug}')">
-          ${xSVG}
-        </button>
-      </div>`).join('');
-  }
-
-  // 2. Barra de filtros
-  const fc = document.getElementById('custom-filter-btns');
-  if (fc) {
-    fc.innerHTML = customCategories.map(c =>
-      `<button class="filter-btn${currentFilter === c.slug ? ' active' : ''}" data-cat="${c.slug}">${escHtml(c.name)}</button>`
-    ).join('');
-    fc.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentFilter = btn.dataset.cat;
-        renderPasswords(document.getElementById('search-input')?.value || '');
-      });
-    });
-  }
-
-  // 3. Modal select — opciones personalizadas (mantiene fijas)
-  const sel = document.getElementById('f-category');
-  if (sel) {
-    sel.querySelectorAll('.custom-cat-opt').forEach(o => o.remove());
-    customCategories.forEach(c => {
-      const o = document.createElement('option');
-      o.value = c.slug; o.textContent = c.name; o.className = 'custom-cat-opt';
-      sel.appendChild(o);
-    });
-  }
+// Sidebar: categorías fijas + personalizadas (con botón de borrar)
+function renderCategoryNav() {
+  const nav = document.getElementById('cats-nav');
+  if (!nav) return;
+  nav.innerHTML = allCategories().map(c => `
+    <div class="nav-row">
+      <a class="nav-item" data-cat="${escHtml(c.slug)}" style="--c:${c.color}" href="/passwords.html?cat=${encodeURIComponent(c.slug)}" title="${escHtml(c.label)}">
+        <span class="cat-ico">${svg('folder', 18)}</span><span class="nav-t">${escHtml(c.label)}</span>
+      </a>
+      ${c.custom ? `<button type="button" class="icon-btn danger nav-x" data-del-cat="${c.id}" data-slug="${escHtml(c.slug)}" aria-label="Eliminar categoría ${escHtml(c.label)}" title="Eliminar">${svg('x', 14, 2.5)}</button>` : ''}
+    </div>`).join('');
+  markSidebarCat();
 }
 
-function setFilter(slug) {
-  currentFilter = slug;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector(`.filter-btn[data-cat="${slug}"]`)?.classList.add('active');
-  renderPasswords('');
+function markSidebarCat() {
+  const cur = typeof currentFilter !== 'undefined' ? currentFilter : null;
+  document.querySelectorAll('#cats-nav .nav-item').forEach(a => a.classList.toggle('active', cur !== null && cur !== 'all' && a.dataset.cat === cur));
 }
 
 async function deleteCat(id, slug) {
-  if (!confirm('¿Eliminar esta categoría?\nLas contraseñas asignadas no se borrarán.')) return;
+  const c = customCategories.find(x => x.id === +id);
+  const ok = await confirmDialog({
+    title: '¿Eliminar categoría?',
+    message: `${c ? `"${c.name}" se eliminará. ` : ''}Las contraseñas asignadas no se borrarán.`,
+    confirmText: 'Eliminar'
+  });
+  if (!ok) return;
   const r = await api.deleteCategory(id);
   if (r.error) return showToast(r.error, 'error');
-  if (currentFilter === slug) currentFilter = 'all';
-  customCategories = customCategories.filter(c => c.id !== id);
-  renderCustomCategories();
-  renderPasswords('');
+  customCategories = customCategories.filter(x => x.id !== +id);
+  renderCategoryNav();
+  document.dispatchEvent(new CustomEvent('kv:cats'));
   showToast('Categoría eliminada', 'success');
 }
 
@@ -96,7 +68,36 @@ async function saveCategoryModal() {
   if (result.error) return showToast(result.error, 'error');
 
   customCategories.push(result);
-  renderCustomCategories();
+  renderCategoryNav();
+  document.dispatchEvent(new CustomEvent('kv:cats'));
   closeCategoryModal();
   showToast(`Categoría "${result.name}" creada`, 'success');
 }
+
+// Se registra después de shell.js, así que el DOM del layout ya existe
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btn-add-category')?.addEventListener('click', openCategoryModal);
+  document.getElementById('btn-cat-modal-cancel')?.addEventListener('click', closeCategoryModal);
+  document.getElementById('btn-cat-cancel2')?.addEventListener('click', closeCategoryModal);
+  document.getElementById('cat-modal-overlay')?.addEventListener('click', e => {
+    if (e.target.id === 'cat-modal-overlay') closeCategoryModal();
+  });
+  document.getElementById('btn-cat-save')?.addEventListener('click', saveCategoryModal);
+  document.getElementById('new-cat-name')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveCategoryModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.getElementById('cat-modal-overlay')?.classList.contains('open')) closeCategoryModal();
+  });
+
+  // Sidebar: borrar categoría; en páginas con lista, filtrar sin recargar
+  document.getElementById('cats-nav')?.addEventListener('click', e => {
+    const del = e.target.closest('[data-del-cat]');
+    if (del) return deleteCat(+del.dataset.delCat, del.dataset.slug);
+    const a = e.target.closest('a[data-cat]');
+    if (a && typeof setFilter === 'function' && document.getElementById('passwords-grid')) {
+      e.preventDefault();
+      setFilter(a.dataset.cat);
+    }
+  });
+});

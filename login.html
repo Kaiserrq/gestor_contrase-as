@@ -2,99 +2,95 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>KeyVault — Iniciar sesión</title>
   <meta name="description" content="Accede a tu gestor de contraseñas seguro.">
+  <meta name="theme-color" content="#08080f">
   <link rel="icon" href="/icono.jpg" type="image/jpeg">
   <link rel="stylesheet" href="/css/style.css">
-  <style>
-    .hidden { display: none !important; }
-  </style>
 </head>
-<body>
-  <div class="login-page">
-    <div class="login-card">
+<body class="login-body">
+  <div class="bg-fx" aria-hidden="true"></div>
 
-      <div class="login-logo">
-        <div class="icon-wrap">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-          </svg>
+  <main class="login-page">
+    <div class="scene">
+      <div class="login-card" id="login-card">
+
+        <div class="emblem" aria-hidden="true">
+          <div class="vault">
+            <div class="v-ring r1"></div>
+            <div class="v-ring r2"></div>
+            <div class="v-ring r3"></div>
+            <div class="v-core">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            </div>
+          </div>
         </div>
+
         <h1>KeyVault</h1>
-        <p>Tu gestor de contraseñas local</p>
+        <p class="sub">Tu gestor de contraseñas local</p>
+
+        <div class="tabs" id="tabs" data-tab="login" role="tablist" aria-label="Acceso">
+          <span class="tab-ind" aria-hidden="true"></span>
+          <button type="button" class="tab" id="tab-login" role="tab" aria-selected="true" aria-controls="login-form">Iniciar sesión</button>
+          <button type="button" class="tab" id="tab-register" role="tab" aria-selected="false" aria-controls="register-form">Crear cuenta</button>
+        </div>
+
+        <!-- FORMULARIO LOGIN -->
+        <form class="login-form" id="login-form" role="tabpanel" aria-labelledby="tab-login" novalidate>
+          <div class="field">
+            <label for="login-user">Usuario</label>
+            <div class="input-wrap">
+              <span class="ico-l"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              <input id="login-user" type="text" class="input" placeholder="Tu nombre de usuario" autocomplete="username">
+            </div>
+          </div>
+          <div class="field">
+            <label for="login-pass">Contraseña</label>
+            <div class="input-wrap has-r">
+              <span class="ico-l"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <input id="login-pass" type="password" class="input" placeholder="Tu contraseña maestra" autocomplete="current-password">
+              <span class="ico-r"><button type="button" class="icon-btn toggle-password" aria-label="Mostrar u ocultar contraseña"></button></span>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Iniciar sesión</button>
+        </form>
+
+        <!-- FORMULARIO REGISTRO -->
+        <form class="login-form hidden" id="register-form" role="tabpanel" aria-labelledby="tab-register" novalidate>
+          <div class="field">
+            <label for="reg-user">Usuario</label>
+            <div class="input-wrap">
+              <span class="ico-l"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              <input id="reg-user" type="text" class="input" placeholder="Mínimo 3 caracteres" autocomplete="username">
+            </div>
+          </div>
+          <div class="field">
+            <label for="reg-pass">Contraseña</label>
+            <div class="input-wrap has-r">
+              <span class="ico-l"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <input id="reg-pass" type="password" class="input" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+              <span class="ico-r"><button type="button" class="icon-btn toggle-password" aria-label="Mostrar u ocultar contraseña"></button></span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="reg-confirm">Confirmar contraseña</label>
+            <div class="input-wrap">
+              <span class="ico-l"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <input id="reg-confirm" type="password" class="input" placeholder="Repite la contraseña" autocomplete="new-password">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Crear cuenta</button>
+        </form>
+
+        <!-- Chip de credenciales demo (lo muestra api-demo.js) -->
+        <button type="button" class="demo-chip hidden" id="demo-chip" aria-label="Autocompletar credenciales de demo">
+          <span>Demo</span><code>demo / demo1234</code><span>· Usar</span>
+        </button>
+
       </div>
-
-      <!-- FORMULARIO LOGIN -->
-      <form class="login-form" id="login-form">
-        <div class="field">
-          <label>Usuario</label>
-          <div class="input-icon-wrap">
-            <span class="icon-left">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </span>
-            <input id="login-user" type="text" class="input" placeholder="Tu nombre de usuario" autocomplete="username">
-          </div>
-        </div>
-        <div class="field">
-          <label>Contraseña</label>
-          <div class="input-icon-wrap">
-            <span class="icon-left">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </span>
-            <input id="login-pass" type="password" class="input" placeholder="Tu contraseña maestra" autocomplete="current-password">
-            <span class="icon-right toggle-password">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </span>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary btn-full">Iniciar sesión</button>
-        <div class="login-divider">o</div>
-        <p class="login-footer">¿No tienes cuenta? <a href="#" id="show-register">Crear cuenta</a></p>
-      </form>
-
-      <!-- FORMULARIO REGISTRO -->
-      <form class="login-form hidden" id="register-form">
-        <div class="field">
-          <label>Usuario</label>
-          <div class="input-icon-wrap">
-            <span class="icon-left">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </span>
-            <input id="reg-user" type="text" class="input" placeholder="Elige un nombre de usuario" autocomplete="username">
-          </div>
-        </div>
-        <div class="field">
-          <label>Contraseña maestra</label>
-          <div class="input-icon-wrap">
-            <span class="icon-left">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </span>
-            <input id="reg-pass" type="password" class="input" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
-            <span class="icon-right toggle-password">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Confirmar contraseña</label>
-          <div class="input-icon-wrap">
-            <span class="icon-left">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </span>
-            <input id="reg-confirm" type="password" class="input" placeholder="Repite tu contraseña" autocomplete="new-password">
-            <span class="icon-right toggle-password">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </span>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary btn-full">Crear cuenta</button>
-        <div class="login-divider">o</div>
-        <p class="login-footer">¿Ya tienes cuenta? <a href="#" id="show-login">Iniciar sesión</a></p>
-      </form>
-
     </div>
-  </div>
+  </main>
 
   <script src="/js/passwords.js"></script>
   <script src="/js/api.js"></script>
