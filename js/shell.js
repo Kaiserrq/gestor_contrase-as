@@ -77,9 +77,9 @@
     const slot = app.querySelector('#content');
     if (content) { while (content.firstChild) slot.appendChild(content.firstChild); content.remove(); }
 
-    // La píldora demo (creada por api-demo.js) pasa a ser lo primero dentro de .main
+    // La píldora demo (creada por api-demo.js) va dentro de la topbar, a la izquierda del buscador
     const demo = document.querySelector('.demo-wrap');
-    if (demo) app.querySelector('.main').prepend(demo);
+    if (demo) { const t = app.querySelector('.top'); t.insertBefore(demo, t.querySelector('.search') || null); }
 
     document.body.insertAdjacentHTML('beforeend', overlays());
 

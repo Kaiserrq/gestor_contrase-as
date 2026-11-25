@@ -218,7 +218,7 @@ const EMPTY_SEARCH = `<svg class="ill" viewBox="0 0 120 100" fill="none" aria-hi
 
 function rowHTML(p, idx) {
   const c = catInfo(p.category), st = pwStrength(p.password), n = escHtml(p.site_name);
-  const anim = idx != null;
+  const anim = idx != null, url = safeUrl(p.site_url);
   return `
   <div class="pw-row${anim ? ' rise' : ''}${openId === p.id ? ' open' : ''}" data-id="${p.id}" style="--c:${c.color};${anim ? `--i:${idx}` : ''}">
     <div class="av" aria-hidden="true">${escHtml(String(p.site_name || '?').trim().charAt(0) || '?')}</div>
@@ -227,12 +227,14 @@ function rowHTML(p, idx) {
       <span class="pw-url">${escHtml(hostOf(p.site_url) || p.username || 'Sin URL')}</span>
     </button>
     <div class="pw-user" title="${escHtml(p.username)}">${escHtml(p.username) || '—'}</div>
-    <div class="pw-pass" aria-hidden="true">••••••••</div>
-    <div class="pw-str" title="Fuerza: ${st.label}">${meterHTML(st.level)}</div>
+    <div class="pw-pass" data-pw="${escHtml(p.password)}" aria-hidden="true">••••••••</div>
+    <div class="pw-str s${Math.max(st.level, 0)}" title="Fuerza: ${st.label}">${meterHTML(st.level)}<span class="s-t">${st.label}</span></div>
     <div class="row-actions">
       <button type="button" class="icon-btn hide-m" data-act="copy-user" aria-label="Copiar usuario de ${n}" title="Copiar usuario">${svg('user', 16)}</button>
       <button type="button" class="icon-btn" data-act="copy-pass" aria-label="Copiar contraseña de ${n}" title="Copiar contraseña">${svg('copy', 16)}</button>
-      <button type="button" class="icon-btn" data-act="edit" aria-label="Editar ${n}" title="Editar">${svg('edit', 16)}</button>
+      <button type="button" class="icon-btn hide-m hide-t" data-act="toggle-row" aria-pressed="false" aria-label="Mostrar contraseña de ${n}" title="Mostrar u ocultar">${svg('eye', 16)}</button>
+      ${url ? `<a class="icon-btn hide-m" data-act="ext" href="${escHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ${n}" title="Abrir sitio">${svg('ext', 16)}</a>` : ''}
+      <button type="button" class="icon-btn hide-m" data-act="edit" aria-label="Editar ${n}" title="Editar">${svg('edit', 16)}</button>
       <button type="button" class="icon-btn danger hide-m" data-act="del" aria-label="Eliminar ${n}" title="Eliminar">${svg('trash', 16)}</button>
     </div>
   </div>`;
@@ -482,11 +484,20 @@ function bindUI() {
     const a = act?.dataset.act;
     if (a === 'add') return openModal();
     if (a === 'clear-filter') return clearFilters();
+    if (a === 'ext') return;
     if (!row) return;
     const id = +row.dataset.id, p = byId(id);
     if (!p) return;
     if (a === 'copy-user') return p.username ? copyText(p.username, 'Usuario copiado') : showToast('Esta entrada no tiene usuario', 'info');
     if (a === 'copy-pass') return copyText(p.password, 'Contraseña copiada', true);
+    if (a === 'toggle-row') {
+      const el = row.querySelector('.pw-pass'), on = act.getAttribute('aria-pressed') !== 'true';
+      el.textContent = on ? el.dataset.pw : '••••••••';
+      act.setAttribute('aria-pressed', String(on));
+      act.setAttribute('aria-label', (on ? 'Ocultar' : 'Mostrar') + ' contraseña de ' + p.site_name);
+      act.innerHTML = svg(on ? 'eyeoff' : 'eye', 16);
+      return;
+    }
     if (a === 'edit') return openModal(id);
     if (a === 'del') return deletePassword(id);
     openDrawer(id);
