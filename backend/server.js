@@ -19,10 +19,17 @@ const BLOCKED = [
   /^\/passwords\.db/i,
   /^\/\.gitignore/i,
   /^\/\.qodo/i,
+  /^\/\.git/i,
+  /^\/netlify\.toml/i,
+  /\.db$/i,
 ];
 
 app.use((req, res, next) => {
-  const blocked = BLOCKED.some(re => re.test(req.path));
+  // Decodifica y normaliza la ruta (evita saltarse el filtro con /%70asswords.db)
+  let p;
+  try { p = path.posix.normalize(decodeURIComponent(req.path)); }
+  catch { return res.status(400).json({ error: 'Ruta inválida.' }); }
+  const blocked = BLOCKED.some(re => re.test(p));
   if (blocked) {
     return res.status(403).json({ error: 'Acceso denegado.' });
   }
@@ -54,7 +61,7 @@ app.get('/', (req, res) => {
 
 // ── Iniciar servidor ──────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, process.env.HOST || '127.0.0.1', () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
   console.log('Presiona Ctrl+C para detener');
 });
