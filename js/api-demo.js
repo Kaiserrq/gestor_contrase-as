@@ -153,11 +153,10 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     const bar = document.createElement('div');
-    bar.style.cssText = 'position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:9999;' +
-      'background:#1e1b2e;color:#e5e7eb;border:1px solid #4b5563;border-radius:999px;padding:6px 8px 6px 14px;' +
-      'font:12px system-ui,sans-serif;display:flex;gap:10px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.4);max-width:94vw';
-    bar.innerHTML = '<span>Modo demo — los datos se guardan solo en tu navegador</span>' +
-      '<button type="button" style="background:#6366f1;color:#fff;border:0;border-radius:999px;padding:4px 10px;cursor:pointer;font:inherit">Restablecer demo</button>';
+    bar.className = 'demo-bar';
+    bar.innerHTML = '<span><strong>Modo demo</strong><span class="demo-bar-long"> — los datos se guardan solo en tu navegador</span></span>' +
+      '<button type="button">Restablecer</button>';
+    document.body.classList.add('has-demo-bar');
     bar.querySelector('button').addEventListener('click', resetDemo);
     document.body.appendChild(bar);
 

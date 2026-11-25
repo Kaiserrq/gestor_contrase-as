@@ -396,7 +396,32 @@ button.nav-item:hover { background:rgba(108,99,255,0.06) !important; border-colo
   .search-input:focus { width:100%; }
   .search-wrap { width:100%; }
   .modal { padding:22px 20px; }
+  /* Botones de la barra: rejilla de 2 columnas, "Agregar" primero y a lo ancho */
+  .topbar-actions { width:100%; display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; }
+  .topbar-actions .btn { justify-content:center; min-height:44px; padding:8px 6px; font-size:12.5px; gap:6px; text-align:center; line-height:1.2; }
+  .topbar-actions .btn svg { flex-shrink:0; }
+  .topbar-actions .btn-primary { order:-1; grid-column:1 / -1; font-size:14px; }
+  .filter-bar { flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
+  .filter-bar::-webkit-scrollbar { display:none; }
+  .filter-btn { flex-shrink:0; }
+  .modal-footer { flex-wrap:wrap; }
+  .modal-footer .btn { flex:1 1 auto; justify-content:center; min-height:44px; }
+  .demo-bar-long { display:none; }
 }
+
+/* ─── BARRA MODO DEMO ────────────────────────────── */
+.demo-bar {
+  position:fixed; bottom:12px; left:50%; transform:translateX(-50%); z-index:150;
+  display:flex; align-items:center; gap:10px; max-width:calc(100vw - 24px);
+  padding:6px 6px 6px 14px; border-radius:999px; white-space:nowrap;
+  background:var(--surface, #1e1b2e); color:var(--text, #e5e7eb); border:1px solid var(--border2, #4b5563);
+  font:12px/1.2 Inter, system-ui, sans-serif; box-shadow:0 6px 20px rgba(0,0,0,.45);
+}
+.demo-bar button {
+  background:var(--accent, #6366f1); color:#fff; border:0; border-radius:999px;
+  padding:6px 12px; min-height:30px; cursor:pointer; font:inherit; font-weight:600;
+}
+body.has-demo-bar .main-content { padding-bottom:72px; }
 @media (min-width: 769px) {
   .hamburger { display:none; }
   .sidebar-overlay { display:none !important; }
